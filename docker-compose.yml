@@ -1,0 +1,36 @@
+services:
+  network-health-check:
+    container_name: network-health-check
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks:
+      - network-health-check-network
+    environment:
+      PGPASSWORD: mypassword
+      PGHOST: network-db
+      PGUSER: myuser
+      PGDATABASE: networkdb
+  network-db:
+    image: postgres:16.9
+    restart: unless-stopped
+    container_name: network-db
+    ports:
+      - 5433:5432
+    networks:
+      - network-health-check-network
+    volumes:
+      - network-db-data:/var/lib/postgresql/data
+      - ./startup-scripts:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_DB: networkdb 
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_USER: myuser
+
+networks:
+  network-health-check-network:
+    driver: bridge
+
+volumes:
+  network-db-data:

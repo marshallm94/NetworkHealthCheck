@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS ping_log (
+    id            INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    createdateutc TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE ('UTC'::TEXT, NOW()),
+    output        JSONB
+);
