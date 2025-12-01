@@ -15,4 +15,5 @@ CREATE VIEW view_ping_log AS (
     FROM ping_log
 );
 
+-- for metabase data
 CREATE DATABASE metabaseappdb;
