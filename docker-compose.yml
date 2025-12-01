@@ -1,6 +1,6 @@
 services:
-  network-health-check:
-    container_name: network-health-check
+  ping-google:
+    container_name: ping-google
     build:
       context: .
       dockerfile: Dockerfile
@@ -15,11 +15,12 @@ services:
   network-db:
     image: postgres:16.9
     restart: unless-stopped
+    hostname: network-db
     container_name: network-db
-    ports:
-      - 5433:5432
     networks:
       - network-health-check-network
+    ports:
+      - 5433:5432
     volumes:
       - network-db-data:/var/lib/postgresql/data
       - ./startup-scripts:/docker-entrypoint-initdb.d
@@ -27,6 +28,28 @@ services:
       POSTGRES_DB: networkdb 
       POSTGRES_PASSWORD: mypassword
       POSTGRES_USER: myuser
+  metabase:
+    container_name: metabase
+    image: metabase/metabase:v0.55.5
+    restart: unless-stopped
+    hostname: metabase
+    volumes:
+      - /dev/urandom:/dev/random:ro
+    ports:
+      - 3111:3000
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabaseappdb
+      MB_DB_HOST: network-db
+      MB_DB_PORT: 5432
+      MB_DB_PASS: mypassword
+      MB_DB_USER: myuser
+      # client-side settings
+      # https://www.metabase.com/docs/latest/configuring-metabase/environment-variables
+      MB_UNAGGREGATED_QUERY_ROW_LIMIT: 1048573
+      MB_AGGREGATED_QUERY_ROW_LIMIT: 1048574
+    networks:
+      - network-health-check-network
 
 networks:
   network-health-check-network:
